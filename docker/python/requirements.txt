@@ -1,0 +1,12 @@
+cryptography==37.0.2
+fastapi==0.78.0
+passlib==1.7.4
+pymysql==1.0.2
+pyjwt==2.4.0
+python-multipart==0.0.5
+uvicorn==0.17.6
+sqlalchemy==1.4.36
+werkzeug==2.1.2
+psycopg2==2.9.3
+ulid-py
+mangum

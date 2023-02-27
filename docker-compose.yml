@@ -1,0 +1,55 @@
+version: "3"
+
+services:
+  python-api:
+      container_name: python_host
+      build: ./docker/python
+      volumes:
+        - .:/src
+      ports:
+        - "8000:8000" # ホストマシンのポート8000を、docker内のポート8000に接続する
+      environment:
+        PMA_HOST: db
+      networks:
+        - mysql_bridge
+
+  mysql:
+    container_name: mysql_host
+    build: ./docker/mysql
+    command: --character-set-server=utf8 --collation-server=utf8_unicode_ci
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: testdb
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: user_name
+      MYSQL_PASSWORD: password
+    volumes:
+      - ./docker/mysql/initdb.d:/docker-entrypoint-initdb.d # 定義どおりにテーブル作成
+      - ./docker/mysql/conf.d:/etc/mysql/conf.d # MySQLの基本設定(文字化け対策)
+#      - ./docker/mysql/mysql_data:/var/lib/mysql
+    restart: always
+    platform: linux/amd64
+    networks:
+      - mysql_bridge
+
+  phpmyadmin:
+    container_name: phpmyadmin_host
+    depends_on:
+      - mysql
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "8080:80" #localhost:8080 で phpMyAdmin にアクセスできます
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql_host
+      PMA_USER: user_name
+      PMA_PASSWORD: password
+    networks:
+      - mysql_bridge
+
+# コンテナ間で通信を行うためのネットワークブリッジ
+networks:
+  mysql_bridge:
+    driver: bridge
